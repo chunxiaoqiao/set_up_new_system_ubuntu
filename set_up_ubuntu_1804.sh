@@ -14,16 +14,7 @@ sudo mv cmake-3.18.4-Linux-x86_64 /opt/cmake-3.18.4
 sudo ln -sf /opt/cmake-3.18.4/bin/* /usr/bin/
 
 
-echo "install gflag and glog ..."
-unzip gflags-master.zip
-cd gflags-master
-mkdir build
-cd build/
-cmake .. -DCMAKE_CXX_FLAGS=-fPIC
-sudo make -j8
-sudo make install
-
-cd ../../
+echo "install gflag and glog  应该要先装glog  装完卸载 需要重装ceres..."
 unzip glog-master.zip
 cd glog-master
 cmake ./
@@ -31,8 +22,18 @@ make -j8
 sudo make install
 cd ../
 
+unzip gflags-master.zip
+cd gflags-master
+mkdir build
+cd build/
+#cmake .. -DCMAKE_CXX_FLAGS=-fPIC
+cmake .. -DCMAKE_CXX_FLAGS=-fPIC
+sudo make -j8
+sudo make install
+cd ../../
 
 echo "install eigen ..."
+tar -xvf eigen-eigen-334.tar.bz2
 cd eigen-eigen-334/eigen-eigen-5a0156e40feb/
 rm -r build 
 mkdir build
@@ -40,11 +41,12 @@ cd build
 cmake ..
 sudo make install
 sudo cp -r /usr/local/include/eigen3/Eigen /usr/local/include 
-cd ../../../
+cd ../../
 
 echo "install ceres ..."
-sudo apt-get install liblapack-dev libsuitesparse-dev -Y
-#sudo apt-get install libcxsparse3 -Y
+sudo apt-get install liblapack-dev libsuitesparse-dev -y
+#sudo apt-get install libcxsparse3 -y
+unzip ceres-solver-1.12.0.zip
 cd ceres-solver-1.12.0
 rm -r build
 mkdir build
@@ -56,6 +58,8 @@ cd ../../
 
 
 echo "install g2o ..."
+sudo apt install rar
+rar x g2o.rar
 sudo apt-get install libsuitesparse-dev -y
 sudo apt-get install qtdeclarative5-dev -y
 sudo apt-get install libqt4-dev -y
@@ -71,37 +75,42 @@ cd build
 cmake ../
 make -j8
 sudo make install
-echo "include /usr/local/lib" >>/etc/ld.so.conf
-ldconfig
+sudo sh -c "echo 'include /usr/local/lib' >>/etc/ld.so.conf"
+#echo "include /usr/local/lib" >>/etc/ld.so.conf
+sudo ldconfig
 cd ../../
 
 echo "install opencv ..."  #要把contribute放到opencv解压后的文件夹里面 
-sudo apt-get install libgtk2.0-dev -Y
-sudo apt-get install build-essential -Y
-sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev -Y
-sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev -Y
-sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev -Y
+sudo apt-get install libgtk2.0-dev -y
+sudo apt-get install build-essential -y
+sudo apt-get install cmake git libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev -y
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev -y
+sudo apt-get install python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libdc1394-22-dev -y
 sudo cp -r /usr/local/include/eigen3/unsupported/ /usr/local/include/   #copy eigen lib 
+tar -xvf opencv-3.4.3.tar.gz
+tar -xvf opencv_contrib-3.4.3.tar.gz
+cp -r  opencv_contrib-3.4.3/ opencv-3.4.3/
 cd opencv-3.4.3/
 rm -r build
 mkdir build
 cd build
-cmake -DOPENCV_ENABLE_NONFREE:BOOL=ON  -D CMAKE_BUILD_TYPE=Release  -D BUILD_PNG=ON -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib-3.4.3/modules ..
+cmake -DOPENCV_ENABLE_NONFREE:BOOL=ON  -D CMAKE_BUILD_TYPE=Release  -D BUILD_PNG=ON -D WITH_QT=ON  -D CMAKE_INSTALL_PREFIX=/usr/local -D OPENCV_EXTRA_MODULES_PATH=../opencv_contrib-3.4.3/modules ..
 make -j16
 sudo make install
 cd ../../
-sudo gedit /etc/ld.so.conf.d/opencv.conf 
+#sudo gedit /etc/ld.so.conf.d/opencv.conf 
 touch /etc/ld.so.conf.d/opencv.conf 
-echo "/usr/local/lib" >>/etc/ld.so.conf.d/opencv.conf
+sudo sh -c "echo '/usr/local/lib' >>/etc/ld.so.conf.d/opencv.conf"
 sudo ldconfig
-echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig
-export PKG_CONFIG_PATH" >>/etc/bash.bashrc
-#cd ../samples/cpp/example_cmake/
+sudo sh -c "echo 'PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/usr/local/lib/pkgconfig 
+export PKG_CONFIG_PATH' >>/etc/bash.bashrc"
+#cd opencv-3.4.3/samples/cpp/example_cmake/
 #cmake ..
 #make
 #./opencv_example
 
 echo "install sophus ..."#只需cmake即可
+unzip Sophus-master.zip 
 cd  Sophus-master/
 sudo rm -r build
 mkdir build
@@ -112,9 +121,10 @@ cd ../../
 if false ;then  #选择性执行  默认不执行  ，需要先把火狐浏览器的压缩包解压到当前文件夹下
 echo "reinstall firefox ..."
 sudo apt-get remove firefox
+tar -xvf Firefox-latest-x86_64.tar.bz2
 sudo mv firefox  /opt
 sudo touch /usr/share/applications/firefox.desktop
-echo "[Desktop Entry]
+sudo sh -c "echo '[Desktop Entry]
 Name=firefox
 Name[zh_CN]=火狐浏览器
 Comment=火狐浏览器
@@ -125,7 +135,7 @@ Terminal=false
 Type=Application
 Categories=Application
 Encoding=UTF-8
-StartupNotify=true" >>/usr/share/applications/firefox.desktop
+StartupNotify=true' >>/usr/share/applications/firefox.desktop"
 fi
 
 
@@ -137,6 +147,7 @@ sudo apt-get update
 sudo apt-get install ros-melodic-desktop-full
 sudo apt-get install ros-melodic-rqt*
 sudo rosdep init  #网不好就换网
+#sudo apt install python-rosdep2   #如果找不到rosdep init 就执行这句
 rosdep update
 sudo apt-get install python-rosinstall
 echo "source /opt/ros/melodic/setup.bash" >>~/.bashrc
@@ -152,7 +163,8 @@ sudo apt-get install libdc1394-22-dev libraw1394-dev -y
 sudo apt-get install libjpeg-dev libpng12-dev libtiff5-dev libopenexr-dev -y
 sudo apt-get install libboost-dev libboost-thread-dev libboost-filesystem-dev -y
 #git clone https://github.com/stevenlovegrove/Pangolin.git
-cd Pangolin
+unzip Pangolin-master.zip
+cd Pangolin-master
 mkdir build
 cd build
 cmake -DCPP11_NO_BOOST=1 ..
@@ -162,4 +174,3 @@ cd ../../
 
 
 #  export PATH=/home/qcx/softear/clion-2021.1.2/bin:${PATH}  #clion 路径
-
